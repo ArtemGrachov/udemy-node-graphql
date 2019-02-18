@@ -259,5 +259,41 @@ module.exports = {
     await user.save();
 
     return true;
+  },
+  user: async (args, req) => {
+    checkAuth(req);
+
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      const error = new Error('No user found)');
+      error.code = 404;
+      throw error;
+    }
+
+    return {
+      ...user._doc,
+      _id: user._id.toString()
+    }
+  },
+  updateStatus: async ({ status }, req) => {
+    checkAuth(req);
+
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      const error = new Error('No user found)');
+      error.code = 404;
+      throw error;
+    }
+
+    user.status = status;
+
+    await user.save();
+
+    return {
+      ...user._doc,
+      _id: user._id.toString()
+    }
   }
 }
