@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const Post = require('../models/post');
 const config = require('../config');
 
 module.exports = {
@@ -68,5 +69,65 @@ module.exports = {
     }, config.jwtSecretKey, { expiresIn: '1h' });
 
     return { token, userId };
+  },
+  createPost: async ({ postInput }, req) => {
+    if (!req.isAuth) {
+      const error = new Error('Not authenticated');
+      error.code = 401;
+      throw error;
+    }
+
+    const errors = [];
+
+    const title = postInput.title;
+    const content = postInput.content;
+    const imageUrl = postInput.imageUrl;
+
+    if (validator.isEmpty(title) || !validator.isLength(title, { min: 5 })) {
+      errors.push({
+        message: 'Title is invalid'
+      })
+    }
+
+    if (validator.isEmpty(content) || !validator.isLength(content, { min: 5 })) {
+      errors.push({
+        message: 'Content is invalid'
+      })
+    }
+
+    if (errors.length) {
+      const error = new Error('Invalid input');
+      error.data = errors;
+      error.status = 422;
+      throw error;
+    }
+
+    const creator = await User.findById(req.userId);
+
+    if (!creator) {
+      const error = new Error('Invalid user');
+      error.status = 401;
+      throw error;
+    }
+
+    const post = new Post({
+      title,
+      content,
+      imageUrl,
+      creator
+    })
+
+    const createdPost = await post.save();
+
+    creator.posts.push(createdPost);
+
+    await creator.save();
+
+    return { 
+      ...createdPost._doc,
+      _id: createdPost._id.toString(),
+      createdAt: createdPost.createdAt.toISOString(),
+      updatedAt: updatedAt.createdAt.toISOString(),
+    }
   }
 }
