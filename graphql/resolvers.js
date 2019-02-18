@@ -9,7 +9,7 @@ module.exports = {
 
     const errors = [];
 
-    if (validator.isEmail(email)) {
+    if (!validator.isEmail(email)) {
       errors.push({ message: 'Email is invalid' });
     }
     if (validator.isEmpty(userInput.password) || !validator.isLength(userInput.password, { min: 5 })) {
@@ -18,6 +18,8 @@ module.exports = {
 
     if (errors.length) {
       const error = new Error('Invalid input');
+      error.data = errors;
+      error.code = 422;
       throw error;
     }
 
@@ -25,6 +27,7 @@ module.exports = {
 
     if (existing) {
       const error = new Error('User exists already');
+      error.code = 422;
       throw error;
     }
 
