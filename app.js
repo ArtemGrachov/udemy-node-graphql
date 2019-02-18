@@ -41,12 +41,6 @@ app.use((req, res, next) => {
   next();
 })
 
-const authRoutes = require('./routes/auth');
-const feedRoutes = require('./routes/feed');
-
-app.use('/auth', authRoutes);
-app.use('/feed', feedRoutes);
-
 app.use((error, req, res, next) => {
   console.log(error);
   res
@@ -59,10 +53,6 @@ app.use((error, req, res, next) => {
 mongoose
   .connect(MONGODB_URI)
   .then(result => {
-    const server = app.listen(8080);
-    const io = require('./socket').init(server);
-    io.on('connection', socket => {
-      console.log('Client connected');
-    })
+    app.listen(8080);
   })
   .catch(err => console.log(err));
