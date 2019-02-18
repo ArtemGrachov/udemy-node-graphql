@@ -127,7 +127,7 @@ module.exports = {
       ...createdPost._doc,
       _id: createdPost._id.toString(),
       createdAt: createdPost.createdAt.toISOString(),
-      updatedAt: updatedAt.createdAt.toISOString(),
+      updatedAt: createdPost.updatedAt.toISOString(),
     }
   }
 }
